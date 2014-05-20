@@ -1,2 +1,7 @@
 /bin
 /xml
+/res
+
+.DS_Store
+.classpath
+.project
