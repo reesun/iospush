@@ -22,17 +22,18 @@ public class PushMain {
 	 * 
 	 * @throws Exception
 	 */
-	public static PushedNotifications send(String alert, String url,
+	public static PushedNotifications send(String alert, String url, String module, 
 			String type, Long time, String id, List<Device> devices) throws Exception {
 		PushNotificationPayload payload = PushNotificationPayload.complex();
-		String keystore = "res/makeup_aps_dis.p12"; // P12文件的路径；
-		String password = "123456"; // P12文件的密码；
+		String keystore = "res/aio_push.p12"; // P12文件的路径；
+		String password = "hk123"; // P12文件的密码；
 		boolean production = true; // 设置true为正式服务地址，false为开发者地址
 
 		payload.addAlert(alert);
 		// payload.addBadge(1);
 		payload.addCustomDictionary("url", url);
 		payload.addCustomDictionary("type", type);
+		payload.addCustomDictionary("module", module);
 		payload.addSound("default");
 		payload.addCustomDictionary("timestamp", time+"");
 		payload.addCustomDictionary("id", id);
@@ -96,20 +97,22 @@ public class PushMain {
 	
 	public static void updateMsgTable(String connFac, String table, String msg_id, String app_id ,int success){
 		String sql = "select count(1) from "+ table 
-				+ " where msg_id = " + msg_id + " and app_id = '" + app_id +"'";
+				+ " where id = " + msg_id + " and app_id = '" + app_id +"'";
+		System.out.println(sql);
 		List<Map<String, Object>> ret = DBUtil.sqlExec(sql, connFac);
 		if(null == ret || ret.size() <= 0)
 			return;
 		else {
-			sql = "update " + table +" set valid = 0,  rev_num = rev_num+ "+success 
-				+ " where msg_id = "+msg_id+ "and app_id = '" +app_id +"'";
+			sql = "update " + table +" set valid = 0,  recv_num = recv_num+ "+success 
+				+ " where id = "+msg_id+ " and app_id = '" +app_id +"'";
+			System.out.println(sql);
 			DBUtil.exec(sql, connFac);
 			
 		}
 	}
 
 	public static void main(String[] args) {
-		String app_id = "50";
+		String app_id = "2";
 		long currTime = DateUtil.getCurTimestamp();
 		
 		// 初始化数据库
@@ -133,6 +136,7 @@ public class PushMain {
 			String alert = (String) msg.get("msg_title");
 			String url = (String) msg.get("msg_url");
 			String type = (String) msg.get("type");
+			String module = (String) msg.get("module");
 			String minVersion = (String) msg.get("min_version");
 			String maxVersion = (String) msg.get("max_version");
 
@@ -140,8 +144,8 @@ public class PushMain {
 
 			// 从device_info中都去deviceToken
 			sql = "SELECT DISTINCT device_token FROM " + deviceTable
-					+ " WHERE app_id = " + app_id + " AND device_token <> ''"
-					+ " AND app_version >='" +minVersion+ "' AND app_version <='"+maxVersion+"'";
+					+ " WHERE app_id = " + app_id + " AND device_token <> ''";
+//					+ " AND app_version >='" +minVersion+ "' AND app_version <='"+maxVersion+"'";
 			ret = DBUtil.sqlExec(sql, ConnFac);
 			if (null == ret || ret.size() <= 0) {
 				return;
@@ -150,11 +154,17 @@ public class PushMain {
 			List<Device> devices = new ArrayList<Device>();
 			
 			// 向苹果服务器发送消息
-			// String token =
-			// "299b7d93332d1dbfb131b4b29ceba9a1f23b36a7eeae3760e65e336270e5b03c";
-			// PushedNotifications result = send(alert, url, type, timeStamp,id,token);
-			// printPushedNotifications(result);
-
+//			BasicDevice device = null;
+//			String token = "7b164e7d84d8b6316f538193acc707a3590b7f38556919085594ca10d1e2600b";
+//			try {
+//				device = new BasicDevice(token);
+//			} catch (InvalidDeviceTokenFormatException e1) {
+//				e1.printStackTrace();
+//				continue;
+//			}
+//
+//			devices.add(device);
+			
 			for (Map<String, Object> tokenMap : ret) {
 				String token = (String) tokenMap.get("device_token");
 				BasicDevice device = null;
@@ -168,7 +178,8 @@ public class PushMain {
 				devices.add(device);
 			}
 			try {
-				PushedNotifications result = send(alert, url, type, currTime, id, devices);
+//				PushedNotifications result = send("test_title", "http://www.manle.com", "aa", currTime, "1000", devices);
+				PushedNotifications result = send(alert, url, module, type, currTime, id, devices);
 				uploadPushedNotifications(result, ConnFac, msgTable, id, app_id);
 			} catch (Exception e) { // 将剩下的token放到未推送表中
 				e.printStackTrace();
