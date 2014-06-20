@@ -136,7 +136,7 @@ public class PushMain {
 			String alert = (String) msg.get("msg_title");
 			String url = (String) msg.get("msg_url");
 			String type = (String) msg.get("type");
-			String module = (String) msg.get("module");
+			String module = (String) msg.get("moudle");
 			String minVersion = (String) msg.get("min_version");
 			String maxVersion = (String) msg.get("max_version");
 
@@ -154,37 +154,40 @@ public class PushMain {
 			List<Device> devices = new ArrayList<Device>();
 			
 			// 向苹果服务器发送消息
-//			BasicDevice device = null;
-//			String token = "7b164e7d84d8b6316f538193acc707a3590b7f38556919085594ca10d1e2600b";
-//			try {
-//				device = new BasicDevice(token);
-//			} catch (InvalidDeviceTokenFormatException e1) {
-//				e1.printStackTrace();
-//				continue;
-//			}
-//
-//			devices.add(device);
-			
-			for (Map<String, Object> tokenMap : ret) {
-				String token = (String) tokenMap.get("device_token");
-				BasicDevice device = null;
-				try {
-					device = new BasicDevice(token) ;
-				} catch (InvalidDeviceTokenFormatException e1) {
-					e1.printStackTrace();
-					continue;
-				}
-				
-				devices.add(device);
-			}
+			BasicDevice device = null;
+			String token = "54368b3354b5f564f02c8928bc57c71137bf6f4c91386cacc7e0d28c81bf1215";
 			try {
-//				PushedNotifications result = send("test_title", "http://www.manle.com", "aa", currTime, "1000", devices);
+				device = new BasicDevice(token);
+			} catch (InvalidDeviceTokenFormatException e1) {
+				e1.printStackTrace();
+				continue;
+			}
+
+			devices.add(device);
+			
+//			for (Map<String, Object> tokenMap : ret) {
+//				String token = (String) tokenMap.get("device_token");
+//				BasicDevice device = null;
+//				try {
+//					device = new BasicDevice(token) ;
+//				} catch (InvalidDeviceTokenFormatException e1) {
+//					System.out.println(token);
+//					e1.printStackTrace();
+//					continue;
+//				}
+//				
+//				devices.add(device);
+//			}
+			try {
+				System.out.println("sending.....");
 				PushedNotifications result = send(alert, url, module, type, currTime, id, devices);
 				uploadPushedNotifications(result, ConnFac, msgTable, id, app_id);
+				
 			} catch (Exception e) { // 将剩下的token放到未推送表中
 				e.printStackTrace();
 			}
 		}
-
+		System.out.println("Down!");
 	}
+	
 }

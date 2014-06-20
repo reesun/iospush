@@ -1,0 +1,8 @@
+Manifest-Version: 1.0
+Main-Class: com.manle.push.ios.PushMain  
+Class-Path: libs/bcprov-jdk15-146.jar libs/commons-dbcp-1.4.jar 
+  libs/commons-logging-1.1.1.jar libs/commons-pool-1.5.4.jar  
+  libs/dom4j-1.6.1.jar libs/JavaPNS_2.2.jar libs/log4j-1.2.15.jar  
+  libs/mysql-connector-java-5.1.13-bin.jar  libs/slf4j-api-1.5.5.jar  
+  libs/slf4j-log4j12-1.5.5.jar  
+
